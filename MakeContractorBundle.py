@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 import arctools as tools
 
-def make_contractor_bundle(project_name: str, search_area, launch_when_done: bool, use_current_as_template: bool): 
+def make_contractor_bundle(project_name: str, search_area, launch_when_done: bool, use_current_as_template: bool, include_search_area: bool): # Add default
     
     today = datetime.now().strftime("%Y%m%d")
     full_name = f"{today}_{project_name.strip()}"
@@ -26,7 +26,14 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
     arcpy.AddMessage(f"📁 Creating from map: {project_map}")
 
     feature_layers = tools.get_all_feature_layers(project_map.listLayers())
-    # Add option (and util)
+
+    # if not include_search_area:
+    #     try:
+    #         feature_layers.remove(search_area)
+    #         arcpy.AddMessage("🔎 Search area removed from layers")
+    #     except ValueError:
+    #         arcpy.AddMessage("ℹ️ Search area not found in layers")
+    # ###TODO: Test this 
 
     arcpy.AddMessage("✂️ Clipping feature layers...")
     new_paths = []
@@ -42,14 +49,16 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
             out_feature_class=output_feature_class
         )
 
-        # check if clipped output has rows
+        # Checks if the clipped output has rows
         feature_count = int(arcpy.management.GetCount(output_feature_class)[0])
+        layers_to_remove.append(layer)
+
         if feature_count > 0:
             new_paths.append(output_feature_class)
         else:
             arcpy.AddMessage(f"  ⚠️ {layer.name} has no features in search area; deleting.")
-            arcpy.Delete_management(output_feature_class)
-        layers_to_remove.append(layer)
+            arcpy.Delete_management(output_feature_class) # Removes empty layers from new db
+        # Remove from map too
 
     for path in new_paths:
         project_map.addDataFromPath(path)
@@ -71,4 +80,6 @@ if __name__ == "__main__":
     search_area = arcpy.GetParameter(1)
     launch_when_done = arcpy.GetParameter(2)
     use_current_as_template = arcpy.GetParameter(3)
-    make_contractor_bundle(project_name, search_area, launch_when_done, use_current_as_template)
+    include_search_area = arcpy.GetParameter(4)
+    
+    make_contractor_bundle(project_name, search_area, launch_when_done, use_current_as_template, include_search_area)
