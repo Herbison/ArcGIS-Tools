@@ -42,7 +42,12 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
             out_feature_class=output_feature_class
         )
 
-        new_paths.append(output_feature_class)
+        # check if clipped output has rows
+        feature_count = int(arcpy.management.GetCount(output_feature_class)[0])
+        if feature_count > 0:
+            new_paths.append(output_feature_class)
+        else:
+            arcpy.AddMessage(f"  ⚠️ {layer.name} has no features in search area; excluding.")
         layers_to_remove.append(layer)
 
     for path in new_paths:
