@@ -12,6 +12,7 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
     gis_root = utils.get_gis_root_from_aprx(current_aprx.filePath)
     projects_root = os.path.join(gis_root, "Projects")
     template_path = utils.get_template_path("_ContractorTemplate")
+    # Add 
 
     proj_folder = utils.create_project_folders(projects_root, full_name)
     proj_aprx = os.path.join(proj_folder, f"{full_name}.aprx")
@@ -20,20 +21,36 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
     arcpy.AddMessage(f"📦 Cloning contractor project: {full_name}")
     aprx = utils.clone_project(template_path, proj_aprx, gdb_path, [proj_folder])
 
-    map_obj = aprx.listMaps()[0]
-    feature_layers = utils.get_all_feature_layers(map_obj.listLayers())
+    project_map = aprx.listMaps()[0]
+    arcpy.AddMessage(f"📁 Creating from map: {project_map}")
+
+    feature_layers = utils.get_all_feature_layers(project_map.listLayers())
 
     arcpy.AddMessage("✂️ Clipping feature layers...")
     new_paths = []
-    for lyr in feature_layers:
-        output_fc = os.path.join(gdb_path, lyr.name)
-        arcpy.AddMessage(f"  ➤ {lyr.name} → {output_fc}")
-        arcpy.analysis.Clip(lyr.dataSource, search_area, output_fc)
-        new_paths.append(output_fc)
-        map_obj.removeLayer(lyr)
+    layers_to_remove = []
+
+    for layer in feature_layers:
+        output_feature_class = os.path.join(gdb_path, layer.name)
+        arcpy.AddMessage(f"  ➤ {layer.name} → {output_feature_class}")
+
+        arcpy.analysis.Clip(
+            in_features=layer.dataSource,
+            clip_features=search_area,
+            out_feature_class=output_feature_class
+        )
+
+        new_paths.append(output_feature_class)
+        layers_to_remove.append(layer)
 
     for path in new_paths:
-        map_obj.addDataFromPath(path)
+        project_map.addDataFromPath(path)
+
+    for layer in layers_to_remove:
+        project_map.removeLayer(layer)
+    # This while thing could be neater, cleaner logic.
+
+    ### ADD TO GDB
 
     aprx.save()
     arcpy.AddMessage("✅ Contractor project updated.")
