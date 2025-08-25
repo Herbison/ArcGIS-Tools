@@ -47,7 +47,8 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
         if feature_count > 0:
             new_paths.append(output_feature_class)
         else:
-            arcpy.AddMessage(f"  ⚠️ {layer.name} has no features in search area; excluding.")
+            arcpy.AddMessage(f"  ⚠️ {layer.name} has no features in search area; deleting.")
+            arcpy.Delete_management(output_feature_class)
         layers_to_remove.append(layer)
 
     for path in new_paths:
