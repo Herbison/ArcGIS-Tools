@@ -29,9 +29,10 @@ import os
 import subprocess
 import re
 from datetime import datetime
-import arcgis_utils as utils
+import arctools as tools
 
-def make_new_project(project_name: str, open_when_done: bool, use_current_as_template: bool):
+def make_new_project(project_name: str, launch_when_done: bool, use_current_as_template: bool):
+    
     today = datetime.now().strftime("%Y%m%d")  # "18760213" for 13 June 1876"
     base_name = re.sub(r'[\\/:*?"<>|]', "", project_name.strip())
     full_name = f"{today}_{base_name}"
@@ -42,23 +43,22 @@ def make_new_project(project_name: str, open_when_done: bool, use_current_as_tem
     """
 
     current_aprx = arcpy.mp.ArcGISProject("CURRENT")
-    gis_root = utils.get_gis_root_from_aprx(current_aprx.filePath)
+    gis_root = tools.get_gis_root_from_aprx(current_aprx.filePath)
     projects_root = os.path.join(gis_root, "Projects")
-
-    template_path = current_aprx.filePath if use_current_as_template else utils.get_template_path("_BaseTemplate")
-    proj_folder = utils.create_project_folders(projects_root, full_name)
+    template_path = current_aprx.filePath if use_current_as_template else tools.get_template_path("_BaseTemplate")
+    proj_folder = tools.create_project_folders(projects_root, full_name)
     proj_aprx = os.path.join(proj_folder, f"{full_name}.aprx")
     gdb_path = os.path.join(proj_folder, f"{full_name}.gdb")
 
     arcpy.AddMessage(f"📁 Creating new project: {full_name}")
-    aprx = utils.clone_project(template_path, proj_aprx, gdb_path, [os.path.join(proj_folder, "_Exports")])
+    aprx = tools.clone_project(template_path, proj_aprx, gdb_path, [os.path.join(proj_folder, "_Exports")])
 
     arcpy.AddMessage("✅ Project created successfully.")
-    if open_when_done:
+    if launch_when_done:
         subprocess.Popen([r"C:\Program Files\ArcGIS\Pro\bin\ArcGISPro.exe", proj_aprx])
 
 if __name__ == "__main__":
-    param0 = arcpy.GetParameterAsText(0)
-    param1 = arcpy.GetParameter(1)
-    param2 = arcpy.GetParameter(2)
-    make_new_project(param0, param1, param2)
+    project_name = arcpy.GetParameterAsText(0)
+    launch_when_done = arcpy.GetParameter(1)
+    use_current_as_template = arcpy.GetParameter(2)
+    make_new_project(project_name, launch_when_done, use_current_as_template)

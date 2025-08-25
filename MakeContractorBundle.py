@@ -2,29 +2,31 @@ import arcpy
 import os
 import subprocess
 from datetime import datetime
-import arcgis_utils as utils
+import arctools as tools
 
-def make_contractor_bundle(project_name: str, search_area, launch_when_done: bool):
+def make_contractor_bundle(project_name: str, search_area, launch_when_done: bool, use_current_as_template: bool): 
+    
     today = datetime.now().strftime("%Y%m%d")
     full_name = f"{today}_{project_name.strip()}"
 
     current_aprx = arcpy.mp.ArcGISProject("CURRENT")
-    gis_root = utils.get_gis_root_from_aprx(current_aprx.filePath)
+    gis_root = tools.get_gis_root_from_aprx(current_aprx.filePath)
     projects_root = os.path.join(gis_root, "Projects")
-    template_path = utils.get_template_path("_ContractorTemplate")
-    # Add 
-
-    proj_folder = utils.create_project_folders(projects_root, full_name)
+    template_path = current_aprx.filePath if use_current_as_template else tools.get_template_path("_ContractorTemplate")
+    proj_folder = tools.create_project_folders(projects_root, full_name)
     proj_aprx = os.path.join(proj_folder, f"{full_name}.aprx")
     gdb_path = os.path.join(proj_folder, f"{full_name}.gdb")
 
-    arcpy.AddMessage(f"📦 Cloning contractor project: {full_name}")
-    aprx = utils.clone_project(template_path, proj_aprx, gdb_path, [proj_folder])
+    arcpy.AddMessage(f"📦 Creating new project: {full_name}")
+    aprx = tools.clone_project(template_path, proj_aprx, gdb_path, [proj_folder])
+
+    ### Everything up to here is redundant (w/ different Template) to MakeNewProject
 
     project_map = aprx.listMaps()[0]
     arcpy.AddMessage(f"📁 Creating from map: {project_map}")
 
-    feature_layers = utils.get_all_feature_layers(project_map.listLayers())
+    feature_layers = tools.get_all_feature_layers(project_map.listLayers())
+    # Add option (and util)
 
     arcpy.AddMessage("✂️ Clipping feature layers...")
     new_paths = []
@@ -61,5 +63,6 @@ def make_contractor_bundle(project_name: str, search_area, launch_when_done: boo
 if __name__ == "__main__":
     project_name = arcpy.GetParameterAsText(0)
     search_area = arcpy.GetParameter(1)
-    open_after = arcpy.GetParameter(2)
-    make_contractor_bundle(project_name, search_area, open_after)
+    launch_when_done = arcpy.GetParameter(2)
+    use_current_as_template = arcpy.GetParameter(3)
+    make_contractor_bundle(project_name, search_area, launch_when_done, use_current_as_template)

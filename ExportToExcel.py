@@ -1,12 +1,12 @@
 import arcpy
 import os
 import pandas as pd
-import arcgis_utils as utils
+import arctools as tools
 
 def export_tables_to_excel(output_excel_path):
     aprx = arcpy.mp.ArcGISProject("CURRENT")
     map_obj = aprx.activeMap
-    layers = utils.get_all_feature_layers(map_obj.listLayers(), visible_only=True)
+    layers = tools.get_all_feature_layers(map_obj.listLayers(), visible_only=True)
 
     writer = pd.ExcelWriter(output_excel_path, engine="openpyxl")
     row_position = 0

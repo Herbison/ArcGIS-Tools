@@ -22,7 +22,7 @@ def get_project_folder(aprx_or_path):
     return os.path.dirname(aprx_or_path)    # plain string path
 
 
-def get_template_path(base_name: str):
+def get_template_path(base_name: str): #Bad name when I have files named template
     aprx = get_current_aprx()
     gis_root = get_gis_root_from_aprx(aprx.filePath)
     return os.path.join(gis_root, "Projects", base_name, f"{base_name}.aprx")
@@ -91,7 +91,7 @@ def clone_project(template_path, new_path, gdb_path=None, add_folders=None):
     for p in add_folders:
         if not p:
             continue
-        if _norm(p) == home:
+        if _norm(p) == home: # Don't remember this part
             # don't add a duplicate of the home path
             continue
         folder_list.append({"connectionString": p, "alias": "", "isHomeFolder": False})
