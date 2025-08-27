@@ -11,6 +11,7 @@ Design goals:
 
 import arcpy
 import os
+from typing import Dict, Any
 import shutil  # NOTE: currently unused; kept in case future file ops are added
 from datetime import datetime  # NOTE: currently unused; kept for symmetry with other scripts
 
@@ -160,7 +161,6 @@ def create_project_folders(projects_root: str,
         raise FileExistsError(f"❌ Project folder already exists: {project_folder}")
 
     os.makedirs(project_folder)
-    # if include_exports:
     os.makedirs(os.path.join(project_folder, "_Exports"), exist_ok=True)
     # os.makedirs(os.path.join(project_folder, ".backups"), exist_ok=True)
 
@@ -313,14 +313,16 @@ def clone_project(template_path: str,
             "isHomeFolder": False
         })
 
+    # new_project.defaultToolbox = os.path.join(project_folder, "ArcTools.atbx")
+    new_project.updateToolboxes([{"toolboxPath": new_project.defaultToolbox, "isDefaultToolbox": True}])
     new_project.updateFolderConnections(folder_connections)  # validate=True by default
     new_project.save()
     return new_project
 
-import arcpy
-import os
-from typing import Dict, Any
 
+# ───────────────────────────────────────────────────────────────────────────────
+# PROJECT ENVIRONMENT INFO
+# ───────────────────────────────────────────────────────────────────────────────
 
 def describe_current_project_environment() -> Dict[str, Any]:
     """

@@ -1,28 +1,21 @@
 """
 MakeNewProject.py
 -----------------
-Create a new ArcGIS Pro project (.aprx) from a template, with a dated name
-and a new file geodatabase. Optionally launch the project after creation.
+Create a new ArcGIS Pro project (.aprx) from a template, with a prefix + base
+name and a new file geodatabase. Optionally launch the project after creation.
 
 Parameters (Script Tool suggestion)
 ----------------------------------
 0: project_name (str)                  # Base name (e.g., "FortHuachuca")
 1: launch_when_done (Boolean)          # Default: True
-2: use_current_as_template (Boolean)   # If True, use CURRENT as template; else "_BaseTemplate"
+2: use_current_as_template (Boolean)   # If True, use CURRENT; else "_BaseTemplate"
+3: custom_prefix (str, optional)       # If blank, default to today's date (YYYYMMDD)
 
-Workflow
+Behavior
 --------
-1) Sanitize the provided base name and prepend today's date (YYYYMMDD_).
-2) Resolve GIS root via CURRENT .aprx to find Projects root.
-3) Create the project folder (and _Exports, .backups).
-4) Clone template .aprx → new .aprx; create and set default .gdb.
-5) Add folder connections (project folder and _Exports).
-6) Optionally launch ArcGIS Pro with the new .aprx.
-
-Notes
------
-- Name sanitization removes characters invalid for Windows filenames.
-- If you want to optionally omit the date prefix, add a new parameter and branch.
+- If custom_prefix is blank → prefix = YYYYMMDD
+- Else → prefix = custom_prefix (sanitized)
+- Final name = "{prefix}_{sanitized_project_name}" (avoids double underscores)
 """
 
 import arcpy
@@ -35,7 +28,8 @@ import arctools as tools
 
 def make_new_project(project_name: str,
                      launch_when_done: bool,
-                     use_current_as_template: bool) -> None:
+                     use_current_as_template: bool,
+                     custom_prefix: str = "") -> None:
     """
     Create a new project from a template and configure default paths.
 
@@ -47,19 +41,31 @@ def make_new_project(project_name: str,
         If True, open the project in ArcGIS Pro after creation.
     use_current_as_template : bool
         If True, clone from CURRENT .aprx; else use "_BaseTemplate".
+    custom_prefix : str, optional
+        Optional prefix for the new project name. If empty/blank, today's date
+        (YYYYMMDD) will be used.
 
     Returns
     -------
     None
     """
-    # Date prefix (YYYYMMDD) for uniqueness and chronological ordering
-    today_str = datetime.now().strftime("%Y%m%d")  # e.g., "20250826"
-
-    # Sanitize the input name to remove characters disallowed in Windows filenames
+    # Sanitizers
     invalid_filename_chars = r'[\\/:*?"<>|]'
+
+    # Determine prefix
+    if custom_prefix and custom_prefix.strip():
+        raw_prefix = re.sub(invalid_filename_chars, "", custom_prefix.strip())
+    else:
+        raw_prefix = datetime.now().strftime("%Y%m%d")  # e.g., "20250827"
+
+    # Ensure single underscore separation even if user typed a trailing "_"
+    safe_prefix = raw_prefix.rstrip("_")
+
+    # Sanitize the base name
     sanitized_base_name = re.sub(invalid_filename_chars, "", project_name.strip())
 
-    full_project_name = f"{today_str}_{sanitized_base_name}"
+    # Compose final name
+    full_project_name = f"{safe_prefix}_{sanitized_base_name}"
 
     # Derive project roots based on the CURRENT .aprx location
     current_project = arcpy.mp.ArcGISProject("CURRENT")
@@ -96,10 +102,12 @@ def make_new_project(project_name: str,
 
 if __name__ == "__main__":
     # Script tool parameter bindings
-    project_name_param = arcpy.GetParameterAsText(0)
-    launch_when_done_param = arcpy.GetParameter(1)
-    use_current_as_template_param = arcpy.GetParameter(2)
+    project_name_param = arcpy.GetParameterAsText(0)         # Required
+    launch_when_done_param = arcpy.GetParameter(1)            # Boolean
+    use_current_as_template_param = arcpy.GetParameter(2)     # Boolean
+    custom_prefix_param = arcpy.GetParameterAsText(3)         # Optional string
 
     make_new_project(project_name_param,
                      launch_when_done_param,
-                     use_current_as_template_param)
+                     use_current_as_template_param,
+                     custom_prefix_param)
