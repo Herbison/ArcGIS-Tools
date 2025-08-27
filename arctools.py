@@ -19,6 +19,21 @@ from datetime import datetime  # NOTE: currently unused; kept for symmetry with 
 # PATH HELPERS
 # ───────────────────────────────────────────────────────────────────────────────
 
+"""
+TODO: Return Current project as .aprx/string, project folder as path (string, yeah?), above that to _Projects folder, and above that to GIS
+Each of those as clearly labeled:
+- get_current_aprx
+- get_current_aprx_path
+- get_current_folder_path
+- get_Projects_path
+- get_GIS_path
+TODO: Once that's done, update references in other scripts
+What's the best way to do so quickly?
+- Think about reference passing
+TODO: Find a way to generalize further, away from my folder layout
+- Make a Class to set folder structure once 
+"""
+
 def get_current_aprx():
     """
     Return
@@ -59,6 +74,7 @@ def get_gis_root_from_aprx(aprx_path: str) -> str:
     return os.path.abspath(os.path.join(os.path.dirname(aprx_path), "..", ".."))
 
 
+# Could add this check for aprx/path in others, like get GIS folder
 def get_project_folder(aprx_or_path):
     """
     Get the folder that contains a given ArcGIS Pro project (.aprx).
@@ -105,10 +121,10 @@ def get_template_path(base_name: str) -> str:
     gis_root = get_gis_root_from_aprx(current_project.filePath)
     return os.path.join(gis_root, "Projects", base_name, f"{base_name}.aprx")
 
-
+# Taking out optional folders for now. Everyone gets Export.
+# Taking out backup folder, but I'll leave the lines. Look into what it does more.
 def create_project_folders(projects_root: str,
-                           project_name: str,
-                           include_exports: bool = True) -> str:
+                           project_name: str,) -> str:
     """
     Create the on-disk folder structure for a new project.
 
@@ -136,7 +152,7 @@ def create_project_folders(projects_root: str,
     - Creates:
         <projects_root>\<project_name>\
         <projects_root>\<project_name>\_Exports   (optional)
-        <projects_root>\<project_name>\.backups
+        <projects_root>\<project_name>\.backups   (Commented out)
     """
     project_folder = os.path.join(projects_root, project_name)
 
@@ -144,9 +160,9 @@ def create_project_folders(projects_root: str,
         raise FileExistsError(f"❌ Project folder already exists: {project_folder}")
 
     os.makedirs(project_folder)
-    if include_exports:
-        os.makedirs(os.path.join(project_folder, "_Exports"), exist_ok=True)
-    os.makedirs(os.path.join(project_folder, ".backups"), exist_ok=True)
+    # if include_exports:
+    os.makedirs(os.path.join(project_folder, "_Exports"), exist_ok=True)
+    # os.makedirs(os.path.join(project_folder, ".backups"), exist_ok=True)
 
     return project_folder
 

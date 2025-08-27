@@ -92,15 +92,20 @@ def export_tables_to_excel(output_excel_path: str) -> None:
 
 if __name__ == "__main__":
     # Parameter 0: desired base filename (default "KMZ Excel")
-    base_file_name = arcpy.GetParameterAsText(0).strip() or "KMZ Excel"
+    base_file_name = arcpy.GetParameterAsText(0).strip() or "KMZExcel"
 
     # Ensure .xlsx extension
     if not base_file_name.lower().endswith(".xlsx"):
         base_file_name += ".xlsx"
 
-    # Save into the current project's folder by default
     current_project = arcpy.mp.ArcGISProject("CURRENT")
     project_folder = os.path.dirname(current_project.filePath)
-    full_output_path = os.path.join(project_folder, base_file_name)
+
+    # Save into the current project's folder by default
+    # Point specifically into the _Exports subfolder
+    exports_folder = os.path.join(project_folder, "_Exports")
+    os.makedirs(exports_folder, exist_ok=True)  # safety check
+
+    full_output_path = os.path.join(exports_folder, base_file_name)
 
     export_tables_to_excel(full_output_path)
