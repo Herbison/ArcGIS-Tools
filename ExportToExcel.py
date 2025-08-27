@@ -19,6 +19,7 @@ Dependencies:
 import arcpy
 import os
 import pandas as pd
+import re as re
 import arctools as tools
 
 
@@ -65,17 +66,20 @@ def export_tables_to_excel(output_excel_path: str) -> None:
                 rows = [list(row) for row in cursor]
             df = pd.DataFrame(rows, columns=field_names)
 
-            # Use the layer's name directly as the Excel sheet/tab name
-            sheet_name = feature_layer.name
-            # Enforce Excel sheet name rules
-            sheet_name = re.sub(r'[\[\]\:\*\?\/\\]', '', sheet_name)[:31]
+            # If the dataframe is empty, add a dummy blank row
+            if df.empty:
+                df = pd.DataFrame([{field_names[0]: ""}], columns=field_names)
 
-            # Write the whole table into its own sheet
+            # Use layer name as sheet/tab name (Excel-safe)
+            sheet_name = re.sub(r'[\[\]\:\*\?\/\\]', '', feature_layer.name)[:31]
+
+            # Write one sheet per layer
             df.to_excel(
                 writer,
                 sheet_name=sheet_name,
                 index=False
             )
+
 
         except Exception as exc:
             arcpy.AddWarning(f"⚠️ Failed to export: {feature_layer.name}\n{exc}")
