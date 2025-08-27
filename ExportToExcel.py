@@ -51,43 +51,38 @@ def export_tables_to_excel(output_excel_path: str) -> None:
     writer = pd.ExcelWriter(output_excel_path, engine="openpyxl")
     next_row_index = 0
 
+    # Create an Excel writer
+    writer = pd.ExcelWriter(output_excel_path, engine="openpyxl")
+
     for feature_layer in feature_layers:
         try:
-            # Layer data source (backed feature class or table)
             dataset_path = feature_layer.dataSource
             dataset_name = os.path.basename(dataset_path)
 
-            # Extract all fields; this preserves order as returned by arcpy.ListFields
-            field_names = [field.name for field in arcpy.ListFields(dataset_path)]
-
-            # Build an in-memory DataFrame from a SearchCursor
-            # NOTE: For very large datasets, consider chunking or writing directly to .xlsx row by row.
+            # Build fields & dataframe
+            field_names = [f.name for f in arcpy.ListFields(dataset_path)]
             with arcpy.da.SearchCursor(dataset_path, field_names) as cursor:
                 rows = [list(row) for row in cursor]
-            dataframe = pd.DataFrame(data=rows, columns=field_names)
+            df = pd.DataFrame(rows, columns=field_names)
 
-            # Write a one-row label (dataset name) to separate sections
-            pd.DataFrame({dataframe.columns[0]: [dataset_name]}).to_excel(
-                writer,
-                startrow=next_row_index,
-                index=False,
-                header=False
-            )
-            next_row_index += 1
+            # Use the layer's name directly as the Excel sheet/tab name
+            sheet_name = feature_layer.name
+            # Enforce Excel sheet name rules
+            sheet_name = re.sub(r'[\[\]\:\*\?\/\\]', '', sheet_name)[:31]
 
-            # Write the entire table
-            dataframe.to_excel(
+            # Write the whole table into its own sheet
+            df.to_excel(
                 writer,
-                startrow=next_row_index,
+                sheet_name=sheet_name,
                 index=False
             )
-            next_row_index += len(dataframe) + 1  # +1 = blank row between layers
 
         except Exception as exc:
             arcpy.AddWarning(f"⚠️ Failed to export: {feature_layer.name}\n{exc}")
 
     writer.close()
-    arcpy.AddMessage(f"✅ Exported to Excel: {output_excel_path}")
+    arcpy.AddMessage(f"✅ Exported to Excel (one sheet per layer): {output_excel_path}")
+
 
 
 if __name__ == "__main__":
