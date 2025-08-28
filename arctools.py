@@ -313,8 +313,6 @@ def clone_project(template_path: str,
             "isHomeFolder": False
         })
 
-    # new_project.defaultToolbox = os.path.join(project_folder, "ArcTools.atbx")
-    new_project.updateToolboxes([{"toolboxPath": new_project.defaultToolbox, "isDefaultToolbox": True}])
     new_project.updateFolderConnections(folder_connections)  # validate=True by default
     new_project.save()
     return new_project
