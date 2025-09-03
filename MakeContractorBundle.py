@@ -1,5 +1,5 @@
 """
-MakeContractorBundle.py
+MakeContractorBundle.py 
 -----------------------
 Create a contractor-ready project by cloning a template and clipping all feature
 layers in the first map to the provided search area. Empty clip results are removed.

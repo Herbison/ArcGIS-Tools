@@ -1,5 +1,5 @@
 """
-MakeNewProject.py
+MakeNewProject.py 
 -----------------
 Create a new ArcGIS Pro project (.aprx) from a template, with a prefix + base
 name and a new file geodatabase. Optionally launch the project after creation.

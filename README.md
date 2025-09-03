@@ -1,1 +1,1 @@
-Some tools to automate my GIS workflow.
+Automating map making to a single tool.

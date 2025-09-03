@@ -1,0 +1,33 @@
+{
+    "defaults":
+    {
+        "project_folder": "C:\\Users\\Username\\GIS\\Projects\\Map",
+        "prefix": "Today's Date", 
+        "use_prefix": true,
+        "folders_to_make": ["_Exports", "Other Folder"],
+        "folders_to_connect": ["_Exports", "Other Folder"],
+        "default_geodatabase": "C:\\Users\\Username\\GIS\\Data\\database.gdb",
+        "export_to_kmz": false,
+        "export_to_excel": false,
+        "print_landscape": true,
+        "print_portrait": false,  
+        "map_name": "Project_name",
+        "zip_geodatabase": false
+    },
+
+    "contractor_bundle":
+    {
+        "project_folder": "C:\\Users\\Username\\GIS\\Projects\\Contractor",
+        "prefix": "Today's Date", 
+        "use_prefix": true,
+        "folders_to_make": ["_Exports", "Other Folder"],
+        "folders_to_connect": ["_Exports", "Other Folder"],
+        "default_geodatabase": "C:\\Users\\Username\\GIS\\Data\\database.gdb",
+        "export_to_kmz": true,
+        "export_to_excel": true,
+        "print_landscape": false,
+        "print_portrait": false,  
+        "map_name": "",
+        "zip_geodatabase": true
+    }
+}

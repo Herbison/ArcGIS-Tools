@@ -1,5 +1,5 @@
 """
-ExportToExcel.py
+ExportToExcel.py 
 ----------------
 Export attribute tables from *visible* feature layers in the active map
 to a single Excel workbook. Each layer is preceded by a one-row label
