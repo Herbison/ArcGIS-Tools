@@ -7,14 +7,65 @@ Design goals:
 - Extremely explicit naming (no ambiguous abbreviations).
 - Clear documentation of side effects and assumptions.
 - Functions are small, single-purpose, and easy to test.
+
+INDEX:
+get_current_aprx
+    - Input: N/A
+    - Returns: arcpy.mp.ArcGISProject (CURRENT project object)
+    - Side effects: None
+
+get_gis_root_from_aprx
+    - Input: aprx_path (str: path to a .aprx file)
+    - Returns: str (GIS root folder, two levels up from aprx_path)
+    - Side effects: None
+
+get_project_folder
+    - Input: aprx_or_path (ArcGISProject object or str path to .aprx)
+    - Returns: str (folder containing the .aprx file)
+    - Side effects: None
+
+get_template_path
+    - Input: base_name (str: template name like "_BaseTemplate")
+    - Returns: str (full path to template .aprx under Projects folder)
+    - Side effects: None
+
+create_project_folders
+    - Input: projects_root (str), project_name (str)
+    - Returns: str (path to newly created project folder)
+    - Side effects: Creates directories for project, "_Exports" (always), ".backups" (commented out)
+
+get_all_feature_layers
+    - Input: layers (list of layers), parent_visible (bool, default=True),
+             visible_only (bool, default=False), include_groups (bool, default=False)
+    - Returns: list of arcpy layer objects (flattened list of feature layers)
+    - Side effects: None (pure traversal/filtering)
+
+clone_project
+    - Input: template_path (str), new_project_path (str),
+             geodatabase_path (str | None), additional_folder_connections (list[str] | None)
+    - Returns: arcpy.mp.ArcGISProject (newly cloned project object)
+    - Side effects:
+        • Saves a copy of template to new_project_path
+        • Creates geodatabase (if requested) and sets as default
+        • Sets project home folder
+        • Updates folder connections
+        • Renames "_BaseTemplateMap" to base project name
+        • Saves new project
+
+describe_current_project_environment
+    - Input: N/A
+    - Returns: dict with project metadata (file paths, defaults, existence flags, map/layout names, folder connections)
+    - Side effects: Reads from current project only (no changes)
+
+print_current_project_environment
+    - Input: N/A
+    - Returns: None
+    - Side effects: Writes project metadata as messages via arcpy.AddMessage
 """
 
 import arcpy
 import os
 from typing import Dict, Any
-import shutil  # NOTE: currently unused; kept in case future file ops are added
-from datetime import datetime  # NOTE: currently unused; kept for symmetry with other scripts
-
 
 # ───────────────────────────────────────────────────────────────────────────────
 # PATH HELPERS
@@ -34,6 +85,10 @@ What's the best way to do so quickly?
 TODO: Find a way to generalize further, away from my folder layout
 - Make a Class to set folder structure once 
 """
+
+
+
+
 
 def get_current_aprx():
     """
@@ -312,6 +367,14 @@ def clone_project(template_path: str,
             "alias": "",
             "isHomeFolder": False
         })
+
+    # 6) Rename default _BaseTemplateMap to whatever the project name is without a date
+    base_name = os.path.splitext(os.path.basename(new_project_path))[0]
+    if "_" in base_name:
+        base_name = base_name.split("_", 1)[1]
+    for m in new_project.listMaps():
+        if m.name == "_BaseTemplateMap":
+            m.name = base_name
 
     new_project.updateFolderConnections(folder_connections)  # validate=True by default
     new_project.save()

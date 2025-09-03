@@ -25,7 +25,6 @@ import re
 from datetime import datetime
 import arctools as tools
 
-
 def make_new_project(project_name: str,
                      launch_when_done: bool,
                      use_current_as_template: bool,
@@ -90,7 +89,7 @@ def make_new_project(project_name: str,
         template_path=template_path,
         new_project_path=new_aprx_path,
         geodatabase_path=new_geodatabase_path,
-        additional_folder_connections=[exports_folder]
+        additional_folder_connections=[exports_folder, gis_root]
     )
 
     arcpy.AddMessage("✅ Project created successfully.")
