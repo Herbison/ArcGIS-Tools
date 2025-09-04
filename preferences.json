@@ -1,8 +1,9 @@
 {
     "defaults":
     {
-        "project_folder": "C:\\Users\\Username\\GIS\\Projects\\Map",
-        "prefix": "Today's Date", 
+        "template_aprx": "C:\\Users\\Username\\GIS\\Projects\\Templates\\Base.aprx",
+        "projects_folder": "C:\\Users\\Username\\GIS\\Projects",
+        "prefix": "[Today's Date]", 
         "use_prefix": true,
         "folders_to_make": ["_Exports", "Other Folder"],
         "folders_to_connect": ["_Exports", "Other Folder"],
@@ -12,22 +13,25 @@
         "print_landscape": true,
         "print_portrait": false,  
         "map_name": "Project_name",
-        "zip_geodatabase": false
+        "zip_geodatabase": false,
+        "layers": []
     },
 
     "contractor_bundle":
     {
-        "project_folder": "C:\\Users\\Username\\GIS\\Projects\\Contractor",
-        "prefix": "Today's Date", 
+        "template_aprx": "C:\\Users\\Username\\GIS\\Projects\\Templates\\Contractor.aprx",
+        "projects_folder": "C:\\GIS\\Projects",
+        "prefix": "[Today's Date]", 
         "use_prefix": true,
-        "folders_to_make": ["_Exports", "Other Folder"],
-        "folders_to_connect": ["_Exports", "Other Folder"],
-        "default_geodatabase": "C:\\Users\\Username\\GIS\\Data\\database.gdb",
+        "folders_to_make": ["_Exports"],
+        "folders_to_connect": ["_Exports"],
+        "default_geodatabase": "C:\\Users\\Username\\GIS\\Data\\default.gdb",
         "export_to_kmz": true,
         "export_to_excel": true,
         "print_landscape": false,
         "print_portrait": false,  
         "map_name": "",
-        "zip_geodatabase": true
+        "zip_geodatabase": true,
+        "layers": []
     }
 }
